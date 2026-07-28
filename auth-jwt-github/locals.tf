@@ -23,25 +23,20 @@ locals {
     for row in local.input_list : "https://github.com/${row.repo_owner}"
   ]
 
-  app_input_list = [
-    for row in local.input_data : {
-      app      = row.application
-      env      = row.environment
-      perms    = row.permissions
-      repo     = row.permissions
-      repo_env = row.repo-environment
-    } if row.sub-application == ""
-  ]
-
-  sub_input_list = [
-    for row in local.input_data : {
-      app      = row.application
-      sub      = row.sub-application
-      env      = row.environment
-      perms    = row.permissions
-      repo     = row.repository
-      repo_env = row.repo-environment
-    } if row.sub-application != ""
+  output_list = [
+    for row in local.input_list : {
+      app           = row.app
+      sub           = row.sub
+      env           = row.env
+      perms         = row.perms
+      repo          = row.repo
+      repo_owner    = row.repo_owner
+      repo_env      = row.repo_env
+      repo_sub      = row.repo_sub
+      map_key       = "${vault_jwt_auth_backend.jwt_github.path}-${row.repo_sub}"
+      auth_path     = vault_jwt_auth_backend.jwt_github.path
+      auth_accessor = vault_jwt_auth_backend.jwt_github.accessor
+    }
   ]
 
 }
