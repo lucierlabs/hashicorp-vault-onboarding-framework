@@ -1,3 +1,0 @@
-application,sub-application,environment,permissions,repository,repo-owner,repo-environment
-vault,deploy,prod,readwrite,vault-onboarding-framework,lucierlabs,prod
-vault,,prod,readwrite,vault-runtime,lucierlabs,prod

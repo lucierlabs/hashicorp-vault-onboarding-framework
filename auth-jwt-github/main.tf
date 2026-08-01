@@ -18,4 +18,5 @@ resource "vault_jwt_auth_backend_role" "app_default_role" {
   }
 
   token_policies = []
+  token_ttl      = var.token_ttl
 }

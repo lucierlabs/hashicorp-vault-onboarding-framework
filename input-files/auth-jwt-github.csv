@@ -1,0 +1,3 @@
+application,sub-application,environment,permissions,owner,repository,repo-environment
+webapp1,deploy,prod,readwrite,lucierlabs,webapp-code,prod
+webapp1,run,prod,readwrite,lucierlabs,webapp-ops,prod

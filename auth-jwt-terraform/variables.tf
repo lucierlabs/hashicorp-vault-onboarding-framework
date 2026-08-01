@@ -7,7 +7,7 @@ variable "vault_addr" {
 variable "input_file" {
   type        = string
   description = "Name of the input file"
-  default     = "../input-files/auth-jwt-github.csv"
+  default     = "../input-files/auth-jwt-terraform.csv"
 }
 
 variable "token_ttl" {
