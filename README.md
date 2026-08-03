@@ -1,4 +1,4 @@
-# Secrets Onboarding Framework
+# HashiCorp Vault Onboarding Framework
 
 An opinionated Terraform framework for standardized, self-service onboarding to HashiCorp Vault using identity-based ACL templates, governed secrets paths, and reusable policies.
 
