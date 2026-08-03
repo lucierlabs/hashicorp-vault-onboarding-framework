@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for contributing to Secrets Onboarding Framework.
+Thank you for contributing to HashiCorp Vault Onboarding Framework.
 
 By submitting a contribution, you agree to license it under the Mozilla Public License 2.0, as stated in [LICENSE](LICENSE). You retain copyright in your contribution; submitting it does not transfer copyright ownership.
 
