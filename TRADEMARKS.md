@@ -1,6 +1,6 @@
 # Trademarks
 
-Secrets Onboarding Framework is an independent project. It is not affiliated with, sponsored by, or endorsed by HashiCorp, Inc.
+HashiCorp Vault Onboarding Framework is an independent project. It is not affiliated with, sponsored by, or endorsed by HashiCorp, Inc.
 
 HashiCorp and Vault are trademarks of HashiCorp, Inc. References to HashiCorp Vault in this repository are descriptive and identify the software with which this project is designed to interoperate.
 
