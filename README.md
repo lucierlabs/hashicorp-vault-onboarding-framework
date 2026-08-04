@@ -8,6 +8,14 @@ This iteration of the framework uses VCS-backed workspaces in HCP Terraform for 
 
 The human authentication for applications teams is done via Okta OIDC based on group membership.  Admin authentication available via LDAP and Okta OIDC.
 
+## Boostrap Credential
+
+The only bootstrap credential is a manually created approle at the auth/admin-approle path that is used by the auth/jwt-terraform method.  All other authentication methods and engines are configured using admin roles defined in the jwt-terraform authentication method.  The admin-approle secret is stored as a sensitive variable in HCP Terraform.
+
+## Configuration Secrets
+
+All configuration secrets are stored in a KV engine called admin-kv at paths matching the names of the directories in GitHub.  Terraform ephemeral resources and write-only attributes are used to securely read the secrets from the admin-kv engine and write them to the respective authenticaiton method or engine.
+
 ## Independent project
 
 This is an independent project and is not affiliated with, sponsored by, or endorsed by HashiCorp, Inc.
