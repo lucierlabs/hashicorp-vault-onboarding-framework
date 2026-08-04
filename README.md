@@ -4,11 +4,9 @@ An opinionated Terraform framework for standardized, self-service onboarding to 
 
 ## Assumptions and Limitations
 
-This iteration of the framework uses VCS-backed workspaces in HCP Terraform for simplicity of demonstration.  This means that it does not contain the full envrionment abstraction that would be possible if using a full CI/CD tool such as GitHub Actions or Harness.
+This iteration of the framework uses VCS-backed workspaces in HCP Terraform for simplicity of demonstration.  This means that it does not contain the full release envrionment abstraction that would be possible if using a full CI/CD tool such as GitHub Actions or Harness.
 
-The human authentication for applications teams is done via Okta OIDC based on group membership.
-
-There is admin authentication available via LDAP and Okta OIDC.
+The human authentication for applications teams is done via Okta OIDC based on group membership.  Admin authentication available via LDAP and Okta OIDC.
 
 ## Independent project
 
