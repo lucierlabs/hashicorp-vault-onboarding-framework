@@ -1,6 +1,6 @@
 locals {
   input_csv  = file("${path.module}/${var.input_file}")
-  input_data = csvdecode("${local.input_csv}")
+  input_data = csvdecode(local.input_csv)
 
   input_list = [
     for row in local.input_data : {
@@ -9,9 +9,9 @@ locals {
       env        = row.environment
       perms      = row.permissions
       repo       = row.repository
-      repo_owner = row.repo-owner
+      repo_owner = row.owner
       repo_env   = row.repo-environment
-      repo_sub   = "repo:${row.repo-owner}/${row.repository}:environment:${row.repo-environment}"
+      repo_sub   = "repo:${row.owner}/${row.repository}:environment:${row.repo-environment}"
     }
   ]
 
@@ -34,6 +34,7 @@ locals {
       repo_env      = row.repo_env
       repo_sub      = row.repo_sub
       map_key       = "${vault_jwt_auth_backend.jwt_github.path}-${row.repo_sub}"
+      alias         = row.repo_sub
       auth_path     = vault_jwt_auth_backend.jwt_github.path
       auth_accessor = vault_jwt_auth_backend.jwt_github.accessor
     }

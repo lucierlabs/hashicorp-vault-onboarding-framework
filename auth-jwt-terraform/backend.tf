@@ -3,5 +3,6 @@ terraform {
     organization = "lucierlabs"
     workspaces {
       name = "auth-jwt-terraform"
+    }
   }
 }

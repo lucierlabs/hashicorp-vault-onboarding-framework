@@ -6,6 +6,8 @@ resource "vault_jwt_auth_backend" "jwt_terraform" {
 }
 
 resource "vault_jwt_auth_backend_role" "app_default_role" {
+  count = length(local.input_list) > 0 ? 1 : 0
+
   backend   = vault_jwt_auth_backend.jwt_terraform.path
   role_name = "app-default-role"
   role_type = "jwt"

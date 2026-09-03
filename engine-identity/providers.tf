@@ -1,1 +1,3 @@
 provider "vault" {}
+
+provider "tfe" {}

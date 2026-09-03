@@ -1,9 +1,3 @@
-variable "vault_addr" {
-  type        = string
-  description = "Address of the HashiCorp Vault server"
-  default     = "https://127.0.0.1:8200"
-}
-
 variable "input_file" {
   type        = string
   description = "Name of the input file"
@@ -11,7 +5,7 @@ variable "input_file" {
 }
 
 variable "token_ttl" {
-  type        = string
-  description = "Token time to live"
-  default     = "4h"
+  type        = number
+  description = "Vault token time to live in seconds"
+  default     = 14400
 }
