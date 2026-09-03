@@ -8,7 +8,7 @@ locals {
       sub     = row.sub-application
       env     = row.environment
       perms   = row.permissions
-      role_id = "${row.application}-${row.sub-application}-${row.environment}"
+      role_id = "${row.application}-${row.sub-application}-${row.environment}-${row.permissions}"
     }
   ]
 
