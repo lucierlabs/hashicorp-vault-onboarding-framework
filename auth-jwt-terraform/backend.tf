@@ -1,5 +1,7 @@
 terraform {
   cloud {
-    organization = "yourorganization"
+    organization = "lucierlabs"
+    workspaces {
+      name = "auth-jwt-terraform"
   }
 }

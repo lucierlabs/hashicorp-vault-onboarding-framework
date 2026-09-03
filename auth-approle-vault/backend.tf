@@ -2,7 +2,7 @@ terraform {
   cloud {
     organization = "lucierlabs"
     workspaces {
-      name = "auth-jwt-github"
+      name = "auth-approle-vault"
     }
   }
 }
