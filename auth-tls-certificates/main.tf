@@ -4,8 +4,6 @@ resource "vault_auth_backend" "tls_certificates" {
 }
 
 resource "vault_cert_auth_backend_role" "app_default_role" {
-  count = length(local.input_list) > 0 ? 1 : 0
-
   backend = vault_auth_backend.tls_certificates.path
   name    = "app-default-role"
 

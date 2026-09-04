@@ -30,8 +30,6 @@ resource "vault_aws_auth_backend_sts_role" "cross_account" {
 }
 
 resource "vault_aws_auth_backend_role" "app_default_role" {
-  count = length(local.input_list) > 0 ? 1 : 0
-
   backend   = vault_auth_backend.sts_aws.path
   role      = "app-default-role"
   auth_type = "iam"

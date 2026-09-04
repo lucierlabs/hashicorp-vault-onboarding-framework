@@ -19,8 +19,6 @@ resource "vault_azure_auth_backend_config" "msi_azure" {
 }
 
 resource "vault_azure_auth_backend_role" "app_default_role" {
-  count = length(local.input_list) > 0 ? 1 : 0
-
   backend = vault_auth_backend.msi_azure.path
   role    = "app-default-role"
 

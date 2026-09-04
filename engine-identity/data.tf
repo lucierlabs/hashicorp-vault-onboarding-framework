@@ -1,8 +1,3 @@
-data "tfe_outputs" "auth_admin_ldap" {
-  organization = "lucierlabs"
-  workspace    = "auth-admin-ldap"
-}
-
 data "tfe_outputs" "auth_approle_vault" {
   organization = "lucierlabs"
   workspace    = "auth-approle-vault"
@@ -51,11 +46,6 @@ data "tfe_outputs" "auth_ldap_racf" {
 data "tfe_outputs" "auth_msi_azure" {
   organization = "lucierlabs"
   workspace    = "auth-msi-azure"
-}
-
-data "tfe_outputs" "auth_oidc_okta" {
-  organization = "lucierlabs"
-  workspace    = "auth-oidc-okta"
 }
 
 data "tfe_outputs" "auth_sts_aws" {

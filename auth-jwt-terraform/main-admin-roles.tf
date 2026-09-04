@@ -1,3 +1,5 @@
+# Auth methods
+
 resource "vault_jwt_auth_backend_role" "admin_auth_admin_ldap" {
   backend   = vault_jwt_auth_backend.jwt_terraform.path
   role_name = "admin-auth-admin-ldap"
@@ -548,6 +550,555 @@ path "sys/mounts/auth/tls-certificates/tune" {
 
 path "auth/tls-certificates/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
+}
+EOT
+}
+
+# Engines
+
+resource "vault_jwt_auth_backend_role" "admin_engine_ad" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-ad"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-ad"
+  }
+
+  token_policies = [vault_policy.admin_engine_ad_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_ad_policy" {
+  name   = "admin-engine-ad-policy"
+  policy = <<EOT
+path "sys/mounts/ad-corp" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/ad-corp/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "ad-corp/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "ad-corp/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "ad-corp/library/+/check-out" {
+  capabilities = ["deny"]
+}
+
+path "ad-corp/rotate-role/*" {
+  capabilities = ["deny"]
+}
+
+path "ad-corp/static-cred/*" {
+  capabilities = ["deny"]
+}
+
+path "admin-kv/data/engine-ad" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-ad/*" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_aws" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-aws"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-aws"
+  }
+
+  token_policies = [vault_policy.admin_engine_aws_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_aws_policy" {
+  name   = "admin-engine-aws-policy"
+  policy = <<EOT
+path "sys/mounts/aws" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/aws/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "aws/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "aws/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "aws/static-creds/*" {
+  capabilities = ["deny"]
+}
+
+path "aws/sts/*" {
+  capabilities = ["deny"]
+}
+
+path "admin-kv/data/engine-aws" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-aws/*" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_azure" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-azure"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-azure"
+  }
+
+  token_policies = [vault_policy.admin_engine_azure_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_azure_policy" {
+  name   = "admin-engine-azure-policy"
+  policy = <<EOT
+path "sys/mounts/azure" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/azure/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "azure/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "azure/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "azure/rotate-role/*" {
+  capabilities = ["deny"]
+}
+
+path "azure/static-creds/*" {
+  capabilities = ["deny"]
+}
+
+path "admin-kv/data/engine-azure" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-azure/*" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_identity" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-identity"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-identity"
+  }
+
+  token_policies = [vault_policy.admin_engine_identity_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_identity_policy" {
+  name   = "admin-engine-identity-policy"
+  policy = <<EOT
+path "identity/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "identity/oidc/token/*" {
+  capabilities = ["deny"]
+}
+
+path "sys/policies/acl/workload-*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_kubernetes" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-kubernetes"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-kubernetes"
+  }
+
+  token_policies = [vault_policy.admin_engine_kubernetes_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_kubernetes_policy" {
+  name   = "admin-engine-kubernetes-policy"
+  policy = <<EOT
+path "sys/mounts/kubernetes-lab" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/kubernetes-lab/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "kubernetes-lab/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "kubernetes-lab/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "admin-kv/data/engine-kubernetes" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-kubernetes/*" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_kv" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-kv"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-kv"
+  }
+
+  token_policies = [vault_policy.admin_engine_kv_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_kv_policy" {
+  name   = "admin-engine-kv-policy"
+  policy = <<EOT
+path "sys/mounts/kv" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/kv/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "kv/config" {
+  capabilities = ["create", "read", "update", "delete"]
+}
+
+path "sys/mounts/admin-kv" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/admin-kv/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "admin-kv/config" {
+  capabilities = ["create", "read", "update", "delete"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_mysql" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-mysql"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-mysql"
+  }
+
+  token_policies = [vault_policy.admin_engine_mysql_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_mysql_policy" {
+  name   = "admin-engine-mysql-policy"
+  policy = <<EOT
+path "sys/mounts/mysql" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/mysql/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "mysql/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "mysql/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "mysql/rotate-role/*" {
+  capabilities = ["deny"]
+}
+
+path "mysql/static-creds/*" {
+  capabilities = ["deny"]
+}
+
+path "admin-kv/data/engine-mysql" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-mysql/*" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_oracle" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-oracle"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-oracle"
+  }
+
+  token_policies = [vault_policy.admin_engine_oracle_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_oracle_policy" {
+  name   = "admin-engine-oracle-policy"
+  policy = <<EOT
+path "sys/mounts/oracle" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/oracle/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "oracle/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "oracle/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "oracle/rotate-role/*" {
+  capabilities = ["deny"]
+}
+
+path "oracle/static-creds/*" {
+  capabilities = ["deny"]
+}
+
+path "admin-kv/data/engine-oracle" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-oracle/*" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_postgres" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-postgres"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-postgres"
+  }
+
+  token_policies = [vault_policy.admin_engine_postgres_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_postgres_policy" {
+  name   = "admin-engine-postgres-policy"
+  policy = <<EOT
+path "sys/mounts/postgres" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/postgres/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "postgres/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "postgres/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "postgres/rotate-role/*" {
+  capabilities = ["deny"]
+}
+
+path "postgres/static-creds/*" {
+  capabilities = ["deny"]
+}
+
+path "admin-kv/data/engine-postgres" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-postgres/*" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_snowflake" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-snowflake"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-snowflake"
+  }
+
+  token_policies = [vault_policy.admin_engine_snowflake_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_snowflake_policy" {
+  name   = "admin-engine-snowflake-policy"
+  policy = <<EOT
+path "sys/mounts/snowflake" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/snowflake/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "snowflake/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "snowflake/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "snowflake/rotate-role/*" {
+  capabilities = ["deny"]
+}
+
+path "snowflake/static-creds/*" {
+  capabilities = ["deny"]
+}
+
+path "admin-kv/data/engine-snowflake" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-snowflake/*" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+resource "vault_jwt_auth_backend_role" "admin_engine_terraform" {
+  backend   = vault_jwt_auth_backend.jwt_terraform.path
+  role_name = "admin-engine-terraform"
+  role_type = "jwt"
+
+  user_claim = "terraform_full_workspace"
+
+  bound_audiences = ["vault.workload.identity"]
+  bound_claims = {
+    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-terraform"
+  }
+
+  token_policies = [vault_policy.admin_engine_terraform_policy.name]
+  token_ttl      = var.token_ttl
+}
+
+resource "vault_policy" "admin_engine_terraform_policy" {
+  name   = "admin-engine-terraform-policy"
+  policy = <<EOT
+path "sys/mounts/terraform" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/terraform/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "terraform/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "terraform/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "terraform/rotate-role/*" {
+  capabilities = ["deny"]
+}
+
+path "admin-kv/data/engine-terraform" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-terraform/*" {
+  capabilities = ["read"]
 }
 EOT
 }
