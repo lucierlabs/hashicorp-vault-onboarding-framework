@@ -77,4 +77,7 @@ locals {
     local.write_aliases,
     local.readwrite_aliases
   )
+
+  admin_aliases = data.tfe_outputs.auth_jwt_terraform.nonsensitive_values.admin_aliases
+
 }

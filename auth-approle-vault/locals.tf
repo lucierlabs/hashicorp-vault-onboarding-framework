@@ -1,5 +1,5 @@
 locals {
-  input_csv  = file("${path.module}/${var.input_file}")
+  input_csv  = file("${path.module}/${var.auth_approle_vault_input_file}")
   input_data = csvdecode(local.input_csv)
 
   input_list = [
@@ -9,7 +9,7 @@ locals {
       env     = row.environment
       perms   = row.permissions
       role_id = "${row.application}-${row.sub-application}-${row.environment}-${row.permissions}"
-    }
+    } if contains(var.environments, row.environment)
   ]
 
   output_list = [

@@ -1,5 +1,5 @@
 locals {
-  input_csv  = file("${path.module}/${var.input_file}")
+  input_csv  = file("${path.module}/${var.auth_sts_aws_input_file}")
   input_data = csvdecode(local.input_csv)
 
   input_list = [
@@ -12,7 +12,7 @@ locals {
       acct_id   = row.account-id
       iam_role  = row.iam-role
       role_arn  = "arn:aws:iam::${row.account-id}:role/${row.iam-role}"
-    }
+    } if contains(var.environments, row.environment)
   ]
 
   role_arn_list = [

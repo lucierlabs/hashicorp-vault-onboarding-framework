@@ -1,5 +1,5 @@
 locals {
-  input_csv  = file("${path.module}/${var.input_file}")
+  input_csv  = file("${path.module}/${var.auth_oidc_okta_input_file}")
   input_data = csvdecode(local.input_csv)
 
   input_list = [
@@ -9,7 +9,7 @@ locals {
       env   = row.environment
       perms = row.permissions
       group = row.group
-    }
+    } if contains(var.environments, row.environment)
   ]
 
   group_list = [

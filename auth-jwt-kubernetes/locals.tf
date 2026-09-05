@@ -1,5 +1,5 @@
 locals {
-  input_csv  = file("${path.module}/${var.input_file}")
+  input_csv  = file("${path.module}/${var.auth_jwt_kubernetes_input_file}")
   input_data = csvdecode(local.input_csv)
 
   input_list = [
@@ -10,7 +10,7 @@ locals {
       perms   = row.permissions
       cluster = row.cluster
       ns      = row.namespace
-    }
+    } if contains(var.environments, row.environment)
   ]
 
   ns_list = [

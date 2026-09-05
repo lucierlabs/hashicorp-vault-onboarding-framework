@@ -1,5 +1,5 @@
 locals {
-  input_csv  = file("${path.module}/${var.input_file}")
+  input_csv  = file("${path.module}/${var.auth_jwt_github_input_file}")
   input_data = csvdecode(local.input_csv)
 
   input_list = [
@@ -12,7 +12,7 @@ locals {
       repo_owner = row.owner
       repo_env   = row.repo-environment
       repo_sub   = "repo:${row.owner}/${row.repository}:environment:${row.repo-environment}"
-    }
+    } if contains(var.environments, row.environment)
   ]
 
   repo_sub_list = [

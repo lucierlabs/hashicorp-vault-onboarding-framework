@@ -1,7 +1,13 @@
-variable "input_file" {
+variable "engine_azure_input_file" {
   type        = string
   description = "Name of the input file"
   default     = "../input-files/engine-azure.csv"
+}
+
+variable "environments" {
+  type        = set(string)
+  description = "CSV environment values handled by this Vault deployment"
+  nullable    = false
 }
 
 variable "azure_subscription_id" {
@@ -14,12 +20,12 @@ variable "azure_tenant_id" {
   description = "Microsoft Entra tenant ID used by the Azure secrets engine"
 }
 
-variable "vault_azure_client_id" {
+variable "engine_azure_client_id" {
   type        = string
   description = "Client ID used by the Azure secrets engine"
 }
 
-variable "vault_azure_client_secret_wo_version" {
+variable "engine_azure_client_secret_wo_version" {
   type        = number
   description = "Version counter used to trigger an update of the write-only Azure client secret"
   default     = 1

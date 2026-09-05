@@ -1,5 +1,5 @@
 locals {
-  input_csv = file("${path.module}/${var.input_file}")
+  input_csv = file("${path.module}/${var.auth_ldap_racf_input_file}")
   input_data = csvdecode(
     trimspace(local.input_csv) == "" ?
     "application,sub-application,environment,permissions,domain,account\n" :
@@ -14,7 +14,7 @@ locals {
       perms  = row.permissions
       domain = row.domain
       acct   = row.account
-    }
+    } if contains(var.environments, row.environment)
   ]
 
   output_list = [

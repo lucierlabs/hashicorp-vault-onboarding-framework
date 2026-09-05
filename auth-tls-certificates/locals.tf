@@ -1,5 +1,5 @@
 locals {
-  input_csv  = file("${path.module}/${var.input_file}")
+  input_csv  = file("${path.module}/${var.auth_tls_certificates_input_file}")
   input_data = csvdecode(local.input_csv)
 
   input_list = [
@@ -10,7 +10,7 @@ locals {
       perms   = row.permissions
       subject = row.subject
       issuer  = row.issuer
-    }
+    } if contains(var.environments, row.environment)
   ]
 
   subject_list = [

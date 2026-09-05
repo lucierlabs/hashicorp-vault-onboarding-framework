@@ -1,5 +1,5 @@
 locals {
-  input_csv  = file("${path.module}/${var.input_file}")
+  input_csv  = file("${path.module}/${var.auth_jwt_azure_input_file}")
   input_data = csvdecode(local.input_csv)
 
   input_list = [
@@ -11,7 +11,7 @@ locals {
       reg_name  = row.application-registration-name
       client_id = row.application-registration-client-id
       org_id    = row.application-registration-organization-id
-    }
+    } if contains(var.environments, row.environment)
   ]
 
   client_id_list = [

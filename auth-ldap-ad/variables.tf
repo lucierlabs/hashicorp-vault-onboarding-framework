@@ -1,7 +1,13 @@
-variable "input_file" {
+variable "auth_ldap_ad_input_file" {
   type        = string
   description = "Name of the input file"
   default     = "../input-files/auth-ldap-ad.csv"
+}
+
+variable "environments" {
+  type        = set(string)
+  description = "CSV environment values handled by this Vault deployment"
+  nullable    = false
 }
 
 variable "token_ttl" {

@@ -1,5 +1,5 @@
 locals {
-  input_csv  = file("${path.module}/${var.input_file}")
+  input_csv  = file("${path.module}/${var.auth_msi_azure_input_file}")
   input_data = csvdecode(local.input_csv)
 
   input_list = [
@@ -11,7 +11,7 @@ locals {
       msi_name  = row.managed-identity-name
       client_id = row.managed-identity-client-id
       object_id = row.managed-identity-object-id
-    }
+    } if contains(var.environments, row.environment)
   ]
 
   object_id_list = [

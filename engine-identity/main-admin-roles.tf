@@ -1,20 +1,56 @@
-# Auth methods
+resource "vault_identity_entity" "admin_entities" {
+  for_each = local.admin_aliases
 
-resource "vault_jwt_auth_backend_role" "admin_auth_admin_ldap" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-admin-ldap"
-  role_type = "jwt"
+  name     = each.value.entity_name
+  policies = each.value.policy
 
-  user_claim = "terraform_full_workspace"
+  depends_on = [
+    vault_policy.admin_auth_admin_ldap_policy,
+    vault_policy.admin_auth_approle_vault_policy,
+    vault_policy.admin_auth_jwt_azure_policy,
+    vault_policy.admin_auth_jwt_github_policy,
+    vault_policy.admin_auth_jwt_harness_policy,
+    vault_policy.admin_auth_jwt_kubernetes_policy,
+    vault_policy.admin_auth_jwt_terraform_policy,
+    vault_policy.admin_auth_kerberos_ad_policy,
+    vault_policy.admin_auth_ldap_ad_policy,
+    vault_policy.admin_auth_ldap_racf_policy,
+    vault_policy.admin_auth_msi_azure_policy,
+    vault_policy.admin_auth_oidc_okta_policy,
+    vault_policy.admin_auth_sts_aws_policy,
+    vault_policy.admin_auth_tls_certificates_policy,
+    vault_policy.admin_engine_ad_policy,
+    vault_policy.admin_engine_aws_policy,
+    vault_policy.admin_engine_azure_policy,
+    vault_policy.admin_engine_kubernetes_policy,
+    vault_policy.admin_engine_kv_policy,
+    vault_policy.admin_engine_mysql_policy,
+    vault_policy.admin_engine_oracle_policy,
+    vault_policy.admin_engine_postgres_policy,
+    vault_policy.admin_engine_snowflake_policy,
+    vault_policy.admin_engine_terraform_policy,
+  ]
 
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-admin-ldap"
+  metadata = {
+    env           = each.value.env
+    workspace     = each.value.work
+    alias         = each.value.alias
+    auth_path     = each.value.auth_path
+    auth_accessor = each.value.auth_accessor
   }
-
-  token_policies = [vault_policy.admin_auth_admin_ldap_policy.name]
-  token_ttl      = var.token_ttl
 }
+
+resource "vault_identity_entity_alias" "admin_aliases" {
+  for_each = local.admin_aliases
+
+  name           = each.value.alias
+  mount_accessor = each.value.auth_accessor
+  canonical_id   = vault_identity_entity.admin_entities[each.key].id
+}
+
+#
+# Auth methods
+#
 
 resource "vault_policy" "admin_auth_admin_ldap_policy" {
   name   = "admin-auth-admin-ldap-policy"
@@ -45,22 +81,6 @@ path "sys/policies/acl/auth-admin-ldap-*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_auth_approle_vault" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-approle-vault"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-approle-vault"
-  }
-
-  token_policies = [vault_policy.admin_auth_approle_vault_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_auth_approle_vault_policy" {
   name   = "admin-auth-approle-vault-policy"
   policy = <<EOT
@@ -80,22 +100,6 @@ path "auth/approle-vault/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_auth_jwt_azure" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-jwt-azure"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-jwt-azure"
-  }
-
-  token_policies = [vault_policy.admin_auth_jwt_azure_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_auth_jwt_azure_policy" {
@@ -119,22 +123,6 @@ path "auth/jwt-azure/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_auth_jwt_github" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-jwt-github"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-jwt-github"
-  }
-
-  token_policies = [vault_policy.admin_auth_jwt_github_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_auth_jwt_github_policy" {
   name   = "admin-auth-jwt-github-policy"
   policy = <<EOT
@@ -154,22 +142,6 @@ path "auth/jwt-github/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_auth_jwt_harness" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-jwt-harness"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-jwt-harness"
-  }
-
-  token_policies = [vault_policy.admin_auth_jwt_harness_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_auth_jwt_harness_policy" {
@@ -193,22 +165,6 @@ path "auth/jwt-harness/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_auth_jwt_kubernetes" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-jwt-kubernetes"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-jwt-kubernetes"
-  }
-
-  token_policies = [vault_policy.admin_auth_jwt_kubernetes_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_auth_jwt_kubernetes_policy" {
   name   = "admin-auth-jwt-kubernetes-policy"
   policy = <<EOT
@@ -228,22 +184,6 @@ path "auth/jwt-kubernetes-lab/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_auth_jwt_terraform" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-jwt-terraform"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-jwt-terraform"
-  }
-
-  token_policies = [vault_policy.admin_auth_jwt_terraform_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_auth_jwt_terraform_policy" {
@@ -271,22 +211,6 @@ path "sys/policies/acl/admin-auth-*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_auth_kerberos_ad" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-kerberos-ad"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-kerberos-ad"
-  }
-
-  token_policies = [vault_policy.admin_auth_kerberos_ad_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_auth_kerberos_ad_policy" {
   name   = "admin-auth-kerberos-ad-policy"
   policy = <<EOT
@@ -310,22 +234,6 @@ path "admin-kv/data/auth-kerberos-ad/*" {
   capabilities = ["read"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_auth_ldap_ad" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-ldap-ad"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-ldap-ad"
-  }
-
-  token_policies = [vault_policy.admin_auth_ldap_ad_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_auth_ldap_ad_policy" {
@@ -353,22 +261,6 @@ path "admin-kv/data/auth-ldap-ad/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_auth_ldap_racf" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-ldap-racf"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-ldap-racf"
-  }
-
-  token_policies = [vault_policy.admin_auth_ldap_racf_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_auth_ldap_racf_policy" {
   name   = "admin-auth-ldap-racf-policy"
   policy = <<EOT
@@ -392,22 +284,6 @@ path "admin-kv/data/auth-ldap-racf/*" {
   capabilities = ["read"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_auth_msi_azure" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-msi-azure"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-msi-azure"
-  }
-
-  token_policies = [vault_policy.admin_auth_msi_azure_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_auth_msi_azure_policy" {
@@ -435,22 +311,6 @@ path "admin-kv/data/auth-msi-azure/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_auth_oidc_okta" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-oidc-okta"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-oidc-okta"
-  }
-
-  token_policies = [vault_policy.admin_auth_oidc_okta_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_auth_oidc_okta_policy" {
   name   = "admin-auth-oidc-okta-policy"
   policy = <<EOT
@@ -474,22 +334,6 @@ path "admin-kv/data/auth-oidc-okta/*" {
   capabilities = ["read"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_auth_sts_aws" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-sts-aws"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-sts-aws"
-  }
-
-  token_policies = [vault_policy.admin_auth_sts_aws_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_auth_sts_aws_policy" {
@@ -517,22 +361,6 @@ path "admin-kv/data/auth-sts-aws/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_auth_tls_certificates" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-auth-tls-certificates"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:auth-tls-certificates"
-  }
-
-  token_policies = [vault_policy.admin_auth_tls_certificates_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_auth_tls_certificates_policy" {
   name   = "admin-auth-tls-certificates-policy"
   policy = <<EOT
@@ -554,23 +382,9 @@ path "auth/tls-certificates/*" {
 EOT
 }
 
+#
 # Engines
-
-resource "vault_jwt_auth_backend_role" "admin_engine_ad" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-ad"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-ad"
-  }
-
-  token_policies = [vault_policy.admin_engine_ad_policy.name]
-  token_ttl      = var.token_ttl
-}
+#
 
 resource "vault_policy" "admin_engine_ad_policy" {
   name   = "admin-engine-ad-policy"
@@ -613,22 +427,6 @@ path "admin-kv/data/engine-ad/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_engine_aws" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-aws"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-aws"
-  }
-
-  token_policies = [vault_policy.admin_engine_aws_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_engine_aws_policy" {
   name   = "admin-engine-aws-policy"
   policy = <<EOT
@@ -664,22 +462,6 @@ path "admin-kv/data/engine-aws/*" {
   capabilities = ["read"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_engine_azure" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-azure"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-azure"
-  }
-
-  token_policies = [vault_policy.admin_engine_azure_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_engine_azure_policy" {
@@ -719,55 +501,6 @@ path "admin-kv/data/engine-azure/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_engine_identity" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-identity"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-identity"
-  }
-
-  token_policies = [vault_policy.admin_engine_identity_policy.name]
-  token_ttl      = var.token_ttl
-}
-
-resource "vault_policy" "admin_engine_identity_policy" {
-  name   = "admin-engine-identity-policy"
-  policy = <<EOT
-path "identity/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-
-path "identity/oidc/token/*" {
-  capabilities = ["deny"]
-}
-
-path "sys/policies/acl/workload-*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_engine_kubernetes" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-kubernetes"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-kubernetes"
-  }
-
-  token_policies = [vault_policy.admin_engine_kubernetes_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_engine_kubernetes_policy" {
   name   = "admin-engine-kubernetes-policy"
   policy = <<EOT
@@ -797,22 +530,6 @@ path "admin-kv/data/engine-kubernetes/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_engine_kv" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-kv"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-kv"
-  }
-
-  token_policies = [vault_policy.admin_engine_kv_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_engine_kv_policy" {
   name   = "admin-engine-kv-policy"
   policy = <<EOT
@@ -840,22 +557,6 @@ path "admin-kv/config" {
   capabilities = ["create", "read", "update", "delete"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_engine_mysql" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-mysql"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-mysql"
-  }
-
-  token_policies = [vault_policy.admin_engine_mysql_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_engine_mysql_policy" {
@@ -895,22 +596,6 @@ path "admin-kv/data/engine-mysql/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_engine_oracle" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-oracle"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-oracle"
-  }
-
-  token_policies = [vault_policy.admin_engine_oracle_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_engine_oracle_policy" {
   name   = "admin-engine-oracle-policy"
   policy = <<EOT
@@ -946,22 +631,6 @@ path "admin-kv/data/engine-oracle/*" {
   capabilities = ["read"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_engine_postgres" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-postgres"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-postgres"
-  }
-
-  token_policies = [vault_policy.admin_engine_postgres_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_engine_postgres_policy" {
@@ -1001,22 +670,6 @@ path "admin-kv/data/engine-postgres/*" {
 EOT
 }
 
-resource "vault_jwt_auth_backend_role" "admin_engine_snowflake" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-snowflake"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-snowflake"
-  }
-
-  token_policies = [vault_policy.admin_engine_snowflake_policy.name]
-  token_ttl      = var.token_ttl
-}
-
 resource "vault_policy" "admin_engine_snowflake_policy" {
   name   = "admin-engine-snowflake-policy"
   policy = <<EOT
@@ -1052,22 +705,6 @@ path "admin-kv/data/engine-snowflake/*" {
   capabilities = ["read"]
 }
 EOT
-}
-
-resource "vault_jwt_auth_backend_role" "admin_engine_terraform" {
-  backend   = vault_jwt_auth_backend.jwt_terraform.path
-  role_name = "admin-engine-terraform"
-  role_type = "jwt"
-
-  user_claim = "terraform_full_workspace"
-
-  bound_audiences = ["vault.workload.identity"]
-  bound_claims = {
-    terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-terraform"
-  }
-
-  token_policies = [vault_policy.admin_engine_terraform_policy.name]
-  token_ttl      = var.token_ttl
 }
 
 resource "vault_policy" "admin_engine_terraform_policy" {
