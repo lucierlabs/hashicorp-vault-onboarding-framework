@@ -4,6 +4,7 @@ token_ttl                                = 14400
 vault_addr                               = "TODO"
 hcp_terraform_workspace_environment      = "prod"
 engine_identity_terraform_full_workspace = "organization:lucierlabs:project:hashicorp-vault-onboarding:workspace:engine-identity-prod"
+jwt_issuer                               = "https://wif-prod.lucierlabs.com/oidc"
 
 # Shared platform endpoints
 azure_tenant_id = "TODO"

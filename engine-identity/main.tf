@@ -24,10 +24,41 @@ resource "vault_identity_entity_alias" "workload_aliases" {
   canonical_id   = vault_identity_entity.workload_entities[each.key].id
 }
 
+resource "vault_identity_oidc" "identity_tokens" {
+  issuer = var.jwt_issuer
+}
+
 resource "vault_identity_oidc_role" "app_default_role" {
   name      = "app-default-role"
   key       = "default"
   client_id = "app-default-role"
+
+  template = <<-EOT
+{
+  "app_id": {{identity.entity.metadata.app_id}},
+  "entity_name": {{identity.entity.name}},
+  "application": {{identity.entity.metadata.app}},
+  "sub_application": {{identity.entity.metadata.sub}},
+  "environment": {{identity.entity.metadata.env}},
+  "permissions": {{identity.entity.metadata.perms}},
+  "alias": {{identity.entity.metadata.alias}},
+  "auth_path": {{identity.entity.metadata.auth_path}},
+  "auth_accessor": {{identity.entity.metadata.auth_accessor}},
+  "entity_metadata": {{identity.entity.metadata}}
+}
+EOT
+}
+
+resource "vault_identity_oidc_role" "external_default_roles" {
+  for_each = toset([
+    "aws",
+    "azure",
+    "terraform",
+  ])
+
+  name      = "${each.value}-default-role"
+  key       = "default"
+  client_id = "${each.value}-default-role"
 
   template = <<-EOT
 {
@@ -50,6 +81,18 @@ resource "vault_policy" "workload_read_policy" {
 
   policy = <<EOT
 path "identity/oidc/token/app-default-role" {
+  capabilities = ["read"]
+}
+
+path "identity/oidc/token/aws-default-role" {
+  capabilities = ["read"]
+}
+
+path "identity/oidc/token/azure-default-role" {
+  capabilities = ["read"]
+}
+
+path "identity/oidc/token/terraform-default-role" {
   capabilities = ["read"]
 }
 
@@ -184,6 +227,18 @@ resource "vault_policy" "workload_write_policy" {
 
   policy = <<EOT
 path "identity/oidc/token/app-default-role" {
+  capabilities = ["read"]
+}
+
+path "identity/oidc/token/aws-default-role" {
+  capabilities = ["read"]
+}
+
+path "identity/oidc/token/azure-default-role" {
+  capabilities = ["read"]
+}
+
+path "identity/oidc/token/terraform-default-role" {
   capabilities = ["read"]
 }
 
