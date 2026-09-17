@@ -1,5 +1,5 @@
 output "environments" {
-  description = "Unique environments discovered in admin-roles.csv."
+  description = "Unique environments discovered in admin-workspaces.csv."
   value       = local.environments
 }
 

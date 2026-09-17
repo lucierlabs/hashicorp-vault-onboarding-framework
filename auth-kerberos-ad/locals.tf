@@ -21,10 +21,10 @@ locals {
       perms         = row.perms
       domain        = row.domain
       acct          = row.acct
-      map_key       = "${vault_auth_backend.kerberos_ad.path}-${row.acct}"
+      map_key       = "${vault_auth_backend.kerberos_ad[row.domain].path}-${row.acct}"
       alias         = row.acct
-      auth_path     = vault_auth_backend.kerberos_ad.path
-      auth_accessor = vault_auth_backend.kerberos_ad.accessor
+      auth_path     = vault_auth_backend.kerberos_ad[row.domain].path
+      auth_accessor = vault_auth_backend.kerberos_ad[row.domain].accessor
     }
   ]
 }

@@ -21,10 +21,10 @@ locals {
       perms         = row.perms
       domain        = row.domain
       acct          = row.acct
-      map_key       = "${vault_ldap_auth_backend.ldap_ad.path}-${row.acct}"
+      map_key       = "${vault_ldap_auth_backend.ldap_ad[row.domain].path}-${row.acct}"
       alias         = row.acct
-      auth_path     = vault_ldap_auth_backend.ldap_ad.path
-      auth_accessor = vault_ldap_auth_backend.ldap_ad.accessor
+      auth_path     = vault_ldap_auth_backend.ldap_ad[row.domain].path
+      auth_accessor = vault_ldap_auth_backend.ldap_ad[row.domain].accessor
     }
   ]
 }

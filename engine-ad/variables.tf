@@ -10,23 +10,13 @@ variable "environments" {
   nullable    = false
 }
 
-variable "ldap_ad_url" {
-  type        = string
-  description = "URL of the Active Directory LDAP server"
-}
-
-variable "engine_ad_bind_dn" {
-  type        = string
-  description = "Bind distinguished name used by the Active Directory secrets engine"
-}
-
-variable "engine_ad_bindpass_wo_version" {
-  type        = number
-  description = "Version counter used to trigger an update of the write-only Active Directory bind password"
-  default     = 1
-}
-
-variable "engine_ad_user_dn" {
-  type        = string
-  description = "Base distinguished name containing the Active Directory users managed by Vault"
+variable "active_directory_domains" {
+  type = map(object({
+    ldap_ad_url                   = string
+    engine_ad_bind_dn             = string
+    engine_ad_bindpass_wo_version = optional(number, 1)
+    engine_ad_user_dn             = string
+  }))
+  description = "Active Directory domain configurations keyed by the short domain name used in Vault paths and Terraform state"
+  nullable    = false
 }

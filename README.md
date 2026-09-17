@@ -10,10 +10,14 @@ The human authentication for applications teams is done via Okta OIDC based on g
 
 ## Bootstrap Credential
 
-The only required bootstrap credential is a manually created AppRole auth method at `auth/admin-approle`. Create the `admin-auth-jwt-terraform-policy`, assign it to a role named `admin-auth-jwt-terraform`, and use the same name as the RoleID:
+The only required bootstrap authentication method is a manually created JWT auth method at `auth/admin-jwt-terraform`. It has a single role, `admin-auth-jwt-terraform`, bound to the `terraform_full_workspace` claim of the `auth-jwt-terraform-<environment>` HCP Terraform workspace. Create it separately in each Vault deployment, replacing the organization, project, and environment placeholders with the values for that deployment:
 
 ```shell
-vault auth enable -path=admin-approle approle
+vault auth enable -path=admin-jwt-terraform jwt
+
+vault write auth/admin-jwt-terraform/config \
+  oidc_discovery_url=https://app.terraform.io \
+  bound_issuer=https://app.terraform.io
 
 vault policy write admin-auth-jwt-terraform-policy - <<'EOF'
 path "auth/token/create" {
@@ -41,16 +45,16 @@ path "sys/policies/acl/admin-engine-identity-policy" {
 }
 EOF
 
-vault write auth/admin-approle/role/admin-auth-jwt-terraform \
-  token_policies=admin-auth-jwt-terraform-policy
-
-vault write auth/admin-approle/role/admin-auth-jwt-terraform/role-id \
-  role_id=admin-auth-jwt-terraform
-
-vault write -force auth/admin-approle/role/admin-auth-jwt-terraform/secret-id
+vault write auth/admin-jwt-terraform/role/admin-auth-jwt-terraform \
+  role_type=jwt \
+  user_claim=terraform_full_workspace \
+  bound_audiences=vault.workload.identity \
+  bound_claims='{"terraform_full_workspace":"organization:<organization>:project:<project>:workspace:auth-jwt-terraform-<environment>"}' \
+  token_policies=admin-auth-jwt-terraform-policy \
+  token_ttl=14400
 ```
 
-The `auth-jwt-terraform` workspace uses this AppRole and policy to create and manage the Terraform JWT auth method and the bootstrap policy for `engine-identity`. Store its generated SecretID in HCP Terraform as a sensitive Terraform variable named `admin_approle_secret_id`. All other authentication methods and engines use admin roles defined in the Terraform JWT auth method.
+Configure the `auth-jwt-terraform-<environment>` workspace to use HCP Terraform's dynamic Vault provider credentials with `TFC_VAULT_AUTH_PATH=admin-jwt-terraform`, `TFC_VAULT_RUN_ROLE=admin-auth-jwt-terraform`, and `TFC_VAULT_WORKLOAD_IDENTITY_AUDIENCE=vault.workload.identity`. This bootstrap role and policy let that workspace create and manage the regular Terraform JWT auth method and the bootstrap policy for `engine-identity`; no static Vault credential or AppRole SecretID is required. All other authentication methods and engines use admin roles defined in the regular Terraform JWT auth method.
 
 ## Configuration Secrets
 
@@ -74,14 +78,18 @@ The `environments` set in each file defines which application environment values
 if contains(var.environments, row.environment)
 ```
 
+The `active_directory_domains` map configures the AD secrets engine and the AD LDAP and Kerberos auth methods. Its keys are stable short domain names: the example `corp` key produces Terraform resource instances keyed by `["corp"]` and Vault paths such as `ad-corp`, `ldap-ad-corp`, and `kerberos-ad-corp`. Add another keyed object to configure another domain. Domain-specific write-only values are read from `admin-kv` at `engine-ad/<domain>`, `auth-ldap-ad/<domain>`, and `auth-kerberos-ad/<domain>`.
+
+The `kubernetes_clusters` map configures the Kubernetes JWT auth methods. Its keys are stable short cluster names: the example `lab` key produces Terraform resource instances keyed by `["lab"]` and the Vault auth path `jwt-kubernetes-lab`. Add another keyed object to configure another cluster, and use the same key in the `cluster` column of `input-files/auth-jwt-kubernetes.csv`.
+
 CSV files keep one environment value per row. When using path-based VCS triggers, include the applicable file under `tfvars-environment` and the component's CSV file in addition to its Terraform working directory.
 
-HCP Terraform workspaces use the name `<directory>-<environment>`, such as `auth-jwt-github-dev` or `engine-identity-prod`. The Identity workspace reads auth outputs from workspaces with its own environment suffix. Administrative workspace identities are generated from `input-files/admin-roles.csv`; the Identity workspace retains a dedicated JWT role so it can authenticate before creating the remaining admin entities and aliases.
+HCP Terraform workspaces use the name `<directory>-<environment>`, such as `auth-jwt-github-dev` or `engine-identity-prod`. The Identity workspace reads auth outputs from workspaces with its own environment suffix. Administrative workspace identities are generated from `input-files/admin-workspaces.csv`; the Identity workspace retains a dedicated JWT role so it can authenticate before creating the remaining admin entities and aliases.
 
 Bootstrap each Vault deployment in this order:
 
-1. Run `auth-jwt-terraform-<environment>` with the bootstrap AppRole so it creates the JWT backend, `admin-default-role`, and the explicit `admin-engine-identity` role and policy.
-2. Run `engine-identity-<environment>` with `admin-engine-identity` so it creates the admin policies, entities, and aliases from `admin-roles.csv`.
+1. Run `auth-jwt-terraform-<environment>` with the `admin-auth-jwt-terraform` role on the bootstrap `admin-jwt-terraform` auth method so it creates the regular JWT backend, `admin-default-role`, and the explicit `admin-engine-identity` role and policy.
+2. Run `engine-identity-<environment>` with `admin-engine-identity` so it creates the admin policies, entities, and aliases from `admin-workspaces.csv`.
 3. Run the remaining `auth-*` and `engine-*` workspaces with `admin-default-role`; their workspace claim resolves to the environment-specific admin entity and policy.
 
 ## Independent project

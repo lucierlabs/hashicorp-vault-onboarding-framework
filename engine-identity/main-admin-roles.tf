@@ -166,24 +166,26 @@ EOT
 }
 
 resource "vault_policy" "admin_auth_jwt_kubernetes_policy" {
-  name   = "admin-auth-jwt-kubernetes-policy"
-  policy = <<EOT
-path "sys/auth/jwt-kubernetes-lab" {
+  name = "admin-auth-jwt-kubernetes-policy"
+  policy = join("\n\n", [
+    for cluster in sort(keys(var.kubernetes_clusters)) : <<-EOT
+path "sys/auth/jwt-kubernetes-${cluster}" {
   capabilities = ["create", "read", "update", "delete", "sudo"]
 }
 
-path "sys/mounts/auth/jwt-kubernetes-lab" {
+path "sys/mounts/auth/jwt-kubernetes-${cluster}" {
   capabilities = ["read"]
 }
 
-path "sys/mounts/auth/jwt-kubernetes-lab/tune" {
+path "sys/mounts/auth/jwt-kubernetes-${cluster}/tune" {
   capabilities = ["read", "update"]
 }
 
-path "auth/jwt-kubernetes-lab/*" {
+path "auth/jwt-kubernetes-${cluster}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 EOT
+  ])
 }
 
 resource "vault_policy" "admin_auth_jwt_terraform_policy" {
@@ -212,53 +214,69 @@ EOT
 }
 
 resource "vault_policy" "admin_auth_kerberos_ad_policy" {
-  name   = "admin-auth-kerberos-ad-policy"
-  policy = <<EOT
-path "sys/auth/kerberos-ad-corp" {
+  name = "admin-auth-kerberos-ad-policy"
+  policy = join("\n\n", concat(
+    [
+      for domain in sort(keys(var.active_directory_domains)) : <<-EOT
+path "sys/auth/kerberos-ad-${domain}" {
   capabilities = ["create", "read", "update", "delete", "sudo"]
 }
 
-path "sys/mounts/auth/kerberos-ad-corp" {
+path "sys/mounts/auth/kerberos-ad-${domain}" {
   capabilities = ["read"]
 }
 
-path "sys/mounts/auth/kerberos-ad-corp/tune" {
+path "sys/mounts/auth/kerberos-ad-${domain}/tune" {
   capabilities = ["read", "update"]
 }
 
-path "auth/kerberos-ad-corp/*" {
+path "auth/kerberos-ad-${domain}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
+EOT
+    ],
+    [
+      <<-EOT
 
 path "admin-kv/data/auth-kerberos-ad/*" {
   capabilities = ["read"]
 }
 EOT
+    ],
+  ))
 }
 
 resource "vault_policy" "admin_auth_ldap_ad_policy" {
-  name   = "admin-auth-ldap-ad-policy"
-  policy = <<EOT
-path "sys/auth/ldap-ad-corp" {
+  name = "admin-auth-ldap-ad-policy"
+  policy = join("\n\n", concat(
+    [
+      for domain in sort(keys(var.active_directory_domains)) : <<-EOT
+path "sys/auth/ldap-ad-${domain}" {
   capabilities = ["create", "read", "update", "delete", "sudo"]
 }
 
-path "sys/mounts/auth/ldap-ad-corp" {
+path "sys/mounts/auth/ldap-ad-${domain}" {
   capabilities = ["read"]
 }
 
-path "sys/mounts/auth/ldap-ad-corp/tune" {
+path "sys/mounts/auth/ldap-ad-${domain}/tune" {
   capabilities = ["read", "update"]
 }
 
-path "auth/ldap-ad-corp/*" {
+path "auth/ldap-ad-${domain}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
+EOT
+    ],
+    [
+      <<-EOT
 
 path "admin-kv/data/auth-ldap-ad/*" {
   capabilities = ["read"]
 }
 EOT
+    ],
+  ))
 }
 
 resource "vault_policy" "admin_auth_ldap_racf_policy" {
@@ -387,35 +405,41 @@ EOT
 #
 
 resource "vault_policy" "admin_engine_ad_policy" {
-  name   = "admin-engine-ad-policy"
-  policy = <<EOT
-path "sys/mounts/ad-corp" {
+  name = "admin-engine-ad-policy"
+  policy = join("\n\n", concat(
+    [
+      for domain in sort(keys(var.active_directory_domains)) : <<-EOT
+path "sys/mounts/ad-${domain}" {
   capabilities = ["create", "read", "update", "delete", "sudo"]
 }
 
-path "sys/mounts/ad-corp/tune" {
+path "sys/mounts/ad-${domain}/tune" {
   capabilities = ["read", "update"]
 }
 
-path "ad-corp/*" {
+path "ad-${domain}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 
-path "ad-corp/creds/*" {
+path "ad-${domain}/creds/*" {
   capabilities = ["deny"]
 }
 
-path "ad-corp/library/+/check-out" {
+path "ad-${domain}/library/+/check-out" {
   capabilities = ["deny"]
 }
 
-path "ad-corp/rotate-role/*" {
+path "ad-${domain}/rotate-role/*" {
   capabilities = ["deny"]
 }
 
-path "ad-corp/static-cred/*" {
+path "ad-${domain}/static-cred/*" {
   capabilities = ["deny"]
 }
+EOT
+    ],
+    [
+      <<-EOT
 
 path "admin-kv/data/engine-ad" {
   capabilities = ["read"]
@@ -425,6 +449,8 @@ path "admin-kv/data/engine-ad/*" {
   capabilities = ["read"]
 }
 EOT
+    ],
+  ))
 }
 
 resource "vault_policy" "admin_engine_aws_policy" {

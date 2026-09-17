@@ -7,7 +7,6 @@ engine_identity_terraform_full_workspace = "organization:lucierlabs:project:hash
 
 # Shared platform endpoints
 azure_tenant_id = "TODO"
-ldap_ad_url     = "TODO"
 
 # CSV inputs
 auth_approle_vault_input_file       = "../input-files/auth-approle-vault.csv"
@@ -16,7 +15,7 @@ auth_jwt_github_input_file          = "../input-files/auth-jwt-github.csv"
 auth_jwt_harness_input_file         = "../input-files/auth-jwt-harness.csv"
 auth_jwt_kubernetes_input_file      = "../input-files/auth-jwt-kubernetes.csv"
 auth_jwt_terraform_input_file       = "../input-files/auth-jwt-terraform.csv"
-auth_jwt_terraform_admin_input_file = "../input-files/admin-roles.csv"
+auth_jwt_terraform_admin_input_file = "../input-files/admin-workspaces.csv"
 auth_kerberos_ad_input_file         = "../input-files/auth-kerberos-ad.csv"
 auth_ldap_ad_input_file             = "../input-files/auth-ldap-ad.csv"
 auth_ldap_racf_input_file           = "../input-files/auth-ldap-racf.csv"
@@ -50,27 +49,39 @@ admin_ldap_upn_domain                   = "TODO"
 azure_audience             = "TODO"
 harness_oidc_discovery_url = "TODO"
 harness_audience           = "TODO"
-kubernetes_oidc_issuer     = "TODO"
-kubernetes_audience        = "TODO"
 
-# Kerberos auth
-kerberos_service_account          = "TODO"
-kerberos_keytab_wo_version        = 1
-kerberos_ldap_url                 = "TODO"
-kerberos_ldap_bind_dn             = "TODO"
-kerberos_ldap_bindpass_wo_version = 1
-kerberos_ldap_user_dn             = "TODO"
-kerberos_group_sam_account_name   = "TODO"
-kerberos_ldap_group_dn            = "TODO"
-kerberos_upn_domain               = "TODO"
+# Kubernetes JWT auth clusters
+kubernetes_clusters = {
+  lab = {
+    kubernetes_oidc_issuer = "TODO"
+    kubernetes_audience    = "TODO"
+  }
+}
 
-# Active Directory LDAP auth
-ldap_ad_bind_dn                = "TODO"
-ldap_ad_bindpass_wo_version    = 1
-ldap_ad_user_dn                = "TODO"
-ldap_ad_group_sam_account_name = "TODO"
-ldap_ad_group_dn               = "TODO"
-ldap_ad_upn_domain             = "TODO"
+# Active Directory domains
+active_directory_domains = {
+  corp = {
+    ldap_ad_url                       = "TODO"
+    engine_ad_bind_dn                 = "TODO"
+    engine_ad_bindpass_wo_version     = 1
+    engine_ad_user_dn                 = "TODO"
+    ldap_ad_bind_dn                   = "TODO"
+    ldap_ad_bindpass_wo_version       = 1
+    ldap_ad_user_dn                   = "TODO"
+    ldap_ad_group_sam_account_name    = "TODO"
+    ldap_ad_group_dn                  = "TODO"
+    ldap_ad_upn_domain                = "TODO"
+    kerberos_service_account          = "TODO"
+    kerberos_keytab_wo_version        = 1
+    kerberos_ldap_url                 = "TODO"
+    kerberos_ldap_bind_dn             = "TODO"
+    kerberos_ldap_bindpass_wo_version = 1
+    kerberos_ldap_user_dn             = "TODO"
+    kerberos_group_sam_account_name   = "TODO"
+    kerberos_ldap_group_dn            = "TODO"
+    kerberos_upn_domain               = "TODO"
+  }
+}
 
 # RACF LDAP auth
 racf_domain                   = "TODO"
@@ -101,11 +112,6 @@ cross_account_sts_role_name     = "TODO"
 
 # TLS certificate auth
 trusted_ca_certificate_pem = "TODO"
-
-# Active Directory secrets engine
-engine_ad_bind_dn             = "TODO"
-engine_ad_bindpass_wo_version = 1
-engine_ad_user_dn             = "TODO"
 
 # AWS secrets engine
 engine_aws_access_key_id         = "TODO"

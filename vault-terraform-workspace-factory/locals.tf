@@ -5,7 +5,7 @@ locals {
   vcs_repository               = "lucierlabs/hashicorp-vault-onboarding-framework"
   vcs_branch                   = "main"
   github_app_installation_name = "lucierlabs"
-  admin_roles_csv_path         = "${path.module}/../input-files/admin-roles.csv"
+  admin_workspaces_csv_path    = "${path.module}/../input-files/admin-workspaces.csv"
   vault_wif_auth_path          = "jwt-terraform"
   vault_wif_audience           = "vault.workload.identity"
   default_vault_wif_role       = "admin-default-role"
@@ -19,19 +19,19 @@ locals {
     prod = "https://vault-prod.lucierlabs.com"
   }
 
-  admin_roles = csvdecode(file(local.admin_roles_csv_path))
+  admin_workspaces = csvdecode(file(local.admin_workspaces_csv_path))
   environments = sort(distinct([
-    for row in local.admin_roles : row.environment
+    for row in local.admin_workspaces : row.environment
   ]))
 
   csv_workspaces = {
-    for row in local.admin_roles : row.workspace => {
+    for row in local.admin_workspaces : row.workspace => {
       name              = row.workspace
       environment       = row.environment
       component         = trimsuffix(row.workspace, "-${row.environment}")
       vault_wif_enabled = true
       vault_wif_role    = local.default_vault_wif_role
-      source            = "admin-roles.csv"
+      source            = "admin-workspaces.csv"
     }
     # Keep the two generated workspace families authoritative even if they are
     # accidentally added to the CSV later.
@@ -74,7 +74,7 @@ locals {
       "${workspace.component}/**",
       "tfvars-environment/${workspace.environment}.tfvars",
       fileexists("${path.module}/../input-files/${workspace.component}.csv") ? "input-files/${workspace.component}.csv" : null,
-      contains(["auth-jwt-terraform", "engine-identity"], workspace.component) ? "input-files/admin-roles.csv" : null,
+      contains(["auth-jwt-terraform", "engine-identity"], workspace.component) ? "input-files/admin-workspaces.csv" : null,
     ])
   }
 

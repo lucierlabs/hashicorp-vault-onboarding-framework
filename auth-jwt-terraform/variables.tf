@@ -32,7 +32,7 @@ variable "token_ttl" {
 variable "auth_jwt_terraform_admin_input_file" {
   type        = string
   description = "Name of the admin input file"
-  default     = "../input-files/admin-roles.csv"
+  default     = "../input-files/admin-workspaces.csv"
 }
 
 variable "engine_identity_terraform_full_workspace" {

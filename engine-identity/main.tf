@@ -9,6 +9,7 @@ resource "vault_identity_entity" "workload_entities" {
     sub           = each.value.sub
     env           = each.value.env
     perms         = each.value.perms
+    app_id        = "${each.value.app}-${each.value.sub}-${each.value.env}"
     alias         = each.value.alias
     auth_path     = each.value.auth_path
     auth_accessor = each.value.auth_accessor
@@ -23,10 +24,35 @@ resource "vault_identity_entity_alias" "workload_aliases" {
   canonical_id   = vault_identity_entity.workload_entities[each.key].id
 }
 
+resource "vault_identity_oidc_role" "app_default_role" {
+  name      = "app-default-role"
+  key       = "default"
+  client_id = "app-default-role"
+
+  template = <<-EOT
+{
+  "app_id": {{identity.entity.metadata.app_id}},
+  "entity_name": {{identity.entity.name}},
+  "application": {{identity.entity.metadata.app}},
+  "sub_application": {{identity.entity.metadata.sub}},
+  "environment": {{identity.entity.metadata.env}},
+  "permissions": {{identity.entity.metadata.perms}},
+  "alias": {{identity.entity.metadata.alias}},
+  "auth_path": {{identity.entity.metadata.auth_path}},
+  "auth_accessor": {{identity.entity.metadata.auth_accessor}},
+  "entity_metadata": {{identity.entity.metadata}}
+}
+EOT
+}
+
 resource "vault_policy" "workload_read_policy" {
   name = "workload-read-policy"
 
   policy = <<EOT
+path "identity/oidc/token/app-default-role" {
+  capabilities = ["read"]
+}
+
 path "kv/data/{{identity.entity.metadata.app}}/{{identity.entity.metadata.sub}}/{{identity.entity.metadata.env}}/app-data/*" {
   capabilities = ["read"]
 }
@@ -75,13 +101,17 @@ path "kv/metadata/{{identity.entity.metadata.app}}/{{identity.entity.metadata.en
   capabilities = ["read", "list"]
 }
 
-path "ad-corp/static-cred/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
+${join("\n\n", [
+  for domain in sort(keys(var.active_directory_domains)) : <<-DOMAIN
+path "ad-${domain}/static-cred/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["read"]
 }
 
-path "ad-corp/static-cred/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
+path "ad-${domain}/static-cred/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["read"]
 }
+DOMAIN
+])}
 
 path "aws/sts/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["update"]
@@ -153,6 +183,10 @@ resource "vault_policy" "workload_write_policy" {
   name = "workload-write-policy"
 
   policy = <<EOT
+path "identity/oidc/token/app-default-role" {
+  capabilities = ["read"]
+}
+
 path "kv/data/{{identity.entity.metadata.app}}/{{identity.entity.metadata.sub}}/{{identity.entity.metadata.env}}/app-data/*" {
   capabilities = ["create", "update", "patch", "delete"]
 }
@@ -185,13 +219,17 @@ path "kv/metadata/{{identity.entity.metadata.app}}/{{identity.entity.metadata.en
   capabilities = ["create", "update", "patch", "delete"]
 }
 
-path "ad-corp/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
+${join("\n\n", [
+  for domain in sort(keys(var.active_directory_domains)) : <<-DOMAIN
+path "ad-${domain}/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["update"]
 }
 
-path "ad-corp/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
+path "ad-${domain}/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["update"]
 }
+DOMAIN
+])}
 
 path "azure/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["update"]

@@ -16,49 +16,18 @@ variable "token_ttl" {
   default     = 14400
 }
 
-variable "kerberos_service_account" {
-  type        = string
-  description = "Kerberos service principal used by the Vault auth method"
-}
-
-variable "kerberos_keytab_wo_version" {
-  type        = number
-  description = "Version counter used to trigger an update of the write-only Kerberos keytab"
-  default     = 1
-}
-
-variable "kerberos_ldap_url" {
-  type        = string
-  description = "URL of the LDAP server used by the Kerberos auth method"
-}
-
-variable "kerberos_ldap_bind_dn" {
-  type        = string
-  description = "Bind distinguished name used to query LDAP for Kerberos identities"
-}
-
-variable "kerberos_ldap_bindpass_wo_version" {
-  type        = number
-  description = "Version counter used to trigger an update of the write-only Kerberos LDAP bind password"
-  default     = 1
-}
-
-variable "kerberos_ldap_user_dn" {
-  type        = string
-  description = "Base distinguished name used to search for Kerberos users"
-}
-
-variable "kerberos_group_sam_account_name" {
-  type        = string
-  description = "sAMAccountName of the Active Directory group permitted to authenticate with Kerberos"
-}
-
-variable "kerberos_ldap_group_dn" {
-  type        = string
-  description = "Base distinguished name used to search for Kerberos groups"
-}
-
-variable "kerberos_upn_domain" {
-  type        = string
-  description = "User principal name domain for Kerberos authentication"
+variable "active_directory_domains" {
+  type = map(object({
+    kerberos_service_account          = string
+    kerberos_keytab_wo_version        = optional(number, 1)
+    kerberos_ldap_url                 = string
+    kerberos_ldap_bind_dn             = string
+    kerberos_ldap_bindpass_wo_version = optional(number, 1)
+    kerberos_ldap_user_dn             = string
+    kerberos_group_sam_account_name   = string
+    kerberos_ldap_group_dn            = string
+    kerberos_upn_domain               = string
+  }))
+  description = "Active Directory domain configurations keyed by the short domain name used in Vault paths and Terraform state"
+  nullable    = false
 }

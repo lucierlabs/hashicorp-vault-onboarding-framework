@@ -1,1 +1,2 @@
 application,sub-application,environment,permissions,cluster,namespace
+webapp1,run,dev,read,lab,webapp1-dev

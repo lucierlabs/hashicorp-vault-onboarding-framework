@@ -16,38 +16,16 @@ variable "token_ttl" {
   default     = 14400
 }
 
-variable "ldap_ad_url" {
-  type        = string
-  description = "URL of the Active Directory LDAP server"
-}
-
-variable "ldap_ad_bind_dn" {
-  type        = string
-  description = "Bind distinguished name used to query Active Directory"
-}
-
-variable "ldap_ad_bindpass_wo_version" {
-  type        = number
-  description = "Version counter used to trigger an update of the write-only Active Directory bind password"
-  default     = 1
-}
-
-variable "ldap_ad_user_dn" {
-  type        = string
-  description = "Base distinguished name used to search for Active Directory users"
-}
-
-variable "ldap_ad_group_sam_account_name" {
-  type        = string
-  description = "sAMAccountName of the Active Directory group permitted to authenticate with LDAP"
-}
-
-variable "ldap_ad_group_dn" {
-  type        = string
-  description = "Base distinguished name used to search for Active Directory groups"
-}
-
-variable "ldap_ad_upn_domain" {
-  type        = string
-  description = "User principal name domain for Active Directory authentication"
+variable "active_directory_domains" {
+  type = map(object({
+    ldap_ad_url                    = string
+    ldap_ad_bind_dn                = string
+    ldap_ad_bindpass_wo_version    = optional(number, 1)
+    ldap_ad_user_dn                = string
+    ldap_ad_group_sam_account_name = string
+    ldap_ad_group_dn               = string
+    ldap_ad_upn_domain             = string
+  }))
+  description = "Active Directory domain configurations keyed by the short domain name used in Vault paths and Terraform state"
+  nullable    = false
 }

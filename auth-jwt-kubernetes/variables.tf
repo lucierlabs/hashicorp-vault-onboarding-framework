@@ -16,12 +16,11 @@ variable "token_ttl" {
   default     = 14400
 }
 
-variable "kubernetes_oidc_issuer" {
-  type        = string
-  description = "Kubernetes OIDC discovery URL and expected service account token issuer"
-}
-
-variable "kubernetes_audience" {
-  type        = string
-  description = "Audience required in Kubernetes service account tokens"
+variable "kubernetes_clusters" {
+  type = map(object({
+    kubernetes_oidc_issuer = string
+    kubernetes_audience    = string
+  }))
+  description = "Kubernetes cluster configurations keyed by the short cluster name used in Vault paths and Terraform state"
+  nullable    = false
 }

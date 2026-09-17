@@ -13,9 +13,12 @@ locals {
     } if contains(var.environments, row.environment)
   ]
 
-  ns_list = [
-    for row in local.input_list : row.ns
-  ]
+  ns_list = {
+    for cluster in keys(var.kubernetes_clusters) : cluster => [
+      for row in local.input_list : row.ns
+      if row.cluster == cluster
+    ]
+  }
 
   output_list = [
     for row in local.input_list : {
@@ -25,10 +28,10 @@ locals {
       perms         = row.perms
       cluster       = row.cluster
       ns            = row.ns
-      map_key       = "${vault_jwt_auth_backend.jwt_kubernetes.path}-${row.ns}"
+      map_key       = "${vault_jwt_auth_backend.jwt_kubernetes[row.cluster].path}-${row.ns}"
       alias         = row.ns
-      auth_path     = vault_jwt_auth_backend.jwt_kubernetes.path
-      auth_accessor = vault_jwt_auth_backend.jwt_kubernetes.accessor
+      auth_path     = vault_jwt_auth_backend.jwt_kubernetes[row.cluster].path
+      auth_accessor = vault_jwt_auth_backend.jwt_kubernetes[row.cluster].accessor
     }
   ]
 }

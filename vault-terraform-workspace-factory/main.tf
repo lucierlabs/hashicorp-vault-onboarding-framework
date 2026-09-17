@@ -35,39 +35,39 @@ resource "tfe_variable" "environment" {
   sensitive    = false
 }
 
-check "admin_roles_organization" {
+check "admin_workspaces_organization" {
   assert {
     condition = alltrue([
-      for row in local.admin_roles : row.organization == local.organization_name
+      for row in local.admin_workspaces : row.organization == local.organization_name
     ])
-    error_message = "Every admin-roles.csv row must use organization '${local.organization_name}'."
+    error_message = "Every admin-workspaces.csv row must use organization '${local.organization_name}'."
   }
 }
 
-check "admin_roles_project" {
+check "admin_workspaces_project" {
   assert {
     condition = alltrue([
-      for row in local.admin_roles : row.project == local.project_name
+      for row in local.admin_workspaces : row.project == local.project_name
     ])
-    error_message = "Every admin-roles.csv row must use project '${local.project_name}'."
+    error_message = "Every admin-workspaces.csv row must use project '${local.project_name}'."
   }
 }
 
-check "admin_roles_workspace_names" {
+check "admin_workspaces_workspace_names" {
   assert {
     condition = alltrue([
-      for row in local.admin_roles : endswith(row.workspace, "-${row.environment}")
+      for row in local.admin_workspaces : endswith(row.workspace, "-${row.environment}")
     ])
-    error_message = "Every workspace in admin-roles.csv must end with its environment name."
+    error_message = "Every workspace in admin-workspaces.csv must end with its environment name."
   }
 }
 
-check "admin_roles_workspace_names_are_unique" {
+check "admin_workspaces_workspace_names_are_unique" {
   assert {
-    condition = length(local.admin_roles) == length(toset([
-      for row in local.admin_roles : row.workspace
+    condition = length(local.admin_workspaces) == length(toset([
+      for row in local.admin_workspaces : row.workspace
     ]))
-    error_message = "Workspace names in admin-roles.csv must be unique."
+    error_message = "Workspace names in admin-workspaces.csv must be unique."
   }
 }
 
@@ -77,6 +77,6 @@ check "vault_addresses_cover_csv_environments" {
       length(setsubtract(toset(local.environments), toset(keys(local.vault_addrs)))) == 0 &&
       length(setsubtract(toset(keys(local.vault_addrs)), toset(local.environments))) == 0
     )
-    error_message = "vault_addrs must have exactly one entry for every unique environment in admin-roles.csv."
+    error_message = "vault_addrs must have exactly one entry for every unique environment in admin-workspaces.csv."
   }
 }

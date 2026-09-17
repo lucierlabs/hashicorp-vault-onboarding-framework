@@ -3,7 +3,7 @@
 This root module creates the HCP Terraform workspaces for the Vault onboarding
 framework. It intentionally declares no Terraform input variables. Configuration
 is held in `locals.tf`, and workspace inventory is read from
-`../input-files/admin-roles.csv`.
+`../input-files/admin-workspaces.csv`.
 
 For every unique CSV environment, the factory also creates:
 
