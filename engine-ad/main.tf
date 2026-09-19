@@ -18,3 +18,23 @@ resource "vault_ldap_secret_backend" "ad" {
   bindpass_wo         = tostring(ephemeral.vault_kv_secret_v2.terraform_secrets[each.key].data["bindpass_wo"])
   bindpass_wo_version = each.value.engine_ad_bindpass_wo_version
 }
+
+resource "vault_ldap_secret_backend_static_role" "ad_app_roles" {
+  for_each = { for row in local.input_list : row.app_key => row if row.sub == "" }
+
+  mount     = vault_ldap_secret_backend.ad[each.value.domain].path
+  role_name = each.value.app_role
+
+  username        = each.value.acct
+  rotation_period = each.value.ttl
+}
+
+resource "vault_ldap_secret_backend_static_role" "ad_sub_roles" {
+  for_each = { for row in local.input_list : row.sub_key => row if row.sub != "" }
+
+  mount     = vault_ldap_secret_backend.ad[each.value.domain].path
+  role_name = each.value.sub_role
+
+  username        = each.value.acct
+  rotation_period = each.value.ttl
+}

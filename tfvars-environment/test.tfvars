@@ -54,8 +54,11 @@ harness_audience           = "TODO"
 # Kubernetes JWT auth clusters
 kubernetes_clusters = {
   lab = {
-    kubernetes_oidc_issuer = "TODO"
-    kubernetes_audience    = "TODO"
+    kubernetes_oidc_issuer         = "TODO"
+    kubernetes_audience            = "TODO"
+    kubernetes_host                = "TODO"
+    kubernetes_ca_cert             = "TODO"
+    service_account_jwt_wo_version = 1
   }
 }
 
@@ -84,17 +87,25 @@ active_directory_domains = {
   }
 }
 
-# RACF LDAP auth
-racf_domain                   = "TODO"
-racf_ldap_url                 = "TODO"
-racf_ldap_bind_dn             = "TODO"
-racf_ldap_bindpass_wo_version = 1
-racf_ldap_user_dn             = "TODO"
-racf_user_attribute           = "TODO"
-racf_user_filter              = "TODO"
-racf_ldap_group_dn            = "TODO"
-racf_group_filter             = "TODO"
-racf_group_attribute          = "TODO"
+# RACF domains
+racf_domains = {
+  mainframe = {
+    ldap_racf_url                   = "TODO"
+    ldap_racf_bind_dn               = "TODO"
+    ldap_racf_bindpass_wo_version   = 1
+    ldap_racf_user_dn               = "TODO"
+    ldap_racf_user_attribute        = "TODO"
+    ldap_racf_user_filter           = "TODO"
+    ldap_racf_group_dn              = "TODO"
+    ldap_racf_group_filter          = "TODO"
+    ldap_racf_group_attribute       = "TODO"
+    engine_racf_bind_dn             = "TODO"
+    engine_racf_bindpass_wo_version = 1
+    engine_racf_user_dn             = "TODO"
+    engine_racf_user_attribute      = "racfid"
+    engine_racf_password_policy     = "TODO"
+  }
+}
 
 # Azure MSI auth
 azure_resource_uri                   = "TODO"
@@ -123,10 +134,38 @@ azure_subscription_id                 = "TODO"
 engine_azure_client_id                = "TODO"
 engine_azure_client_secret_wo_version = 1
 
-# Kubernetes secrets engine
-kubernetes_host                                 = "TODO"
-kubernetes_ca_cert                              = "TODO"
-vault_kubernetes_service_account_jwt_wo_version = 1
+# Database secrets engine connections
+engine_mysql_connections = {
+  example = {
+    connection_url      = "TODO"
+    username            = "TODO"
+    password_wo_version = 1
+  }
+}
+
+engine_oracle_connections = {
+  example = {
+    connection_url      = "TODO"
+    username            = "TODO"
+    password_wo_version = 1
+  }
+}
+
+engine_postgres_connections = {
+  example = {
+    connection_url      = "TODO"
+    username            = "TODO"
+    password_wo_version = 1
+  }
+}
+
+engine_snowflake_connections = {
+  example = {
+    connection_url         = "TODO"
+    username               = "TODO"
+    private_key_wo_version = 1
+  }
+}
 
 # HCP Terraform secrets engine
 vault_terraform_token_wo_version = 1

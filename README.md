@@ -58,7 +58,14 @@ Configure the `auth-jwt-terraform-<environment>` workspace to use HCP Terraform'
 
 ## Configuration Secrets
 
-All configuration secrets are stored in a KV engine called admin-kv at paths matching the names of the directories in GitHub.  Terraform ephemeral resources and write-only attributes are used to securely read the secrets from the admin-kv engine and write them to the respective authenticaiton method or engine.
+All configuration secrets are stored in a KV engine called admin-kv at paths matching the names of the directories in GitHub. Terraform ephemeral resources and write-only attributes are used to securely read the secrets from the admin-kv engine and write them to the respective authentication method or engine.
+
+Per-instance engine configuration secrets use these paths and keys:
+
+- `engine-ad/<domain>`, `engine-racf/<domain>`, `auth-ldap-ad/<domain>`, and `auth-ldap-racf/<domain>` use `bindpass_wo`.
+- `engine-kubernetes/<cluster>` uses `service_account_jwt_wo`.
+- `engine-mysql/<connection>`, `engine-oracle/<connection>`, and `engine-postgres/<connection>` use `password_wo` for the privileged database connection account.
+- `engine-snowflake/<connection>` uses `private_key_wo` for the privileged Snowflake connection account.
 
 ## Environment Configuration
 
@@ -80,7 +87,9 @@ if contains(var.environments, row.environment)
 
 The `active_directory_domains` map configures the AD secrets engine and the AD LDAP and Kerberos auth methods. Its keys are stable short domain names: the example `corp` key produces Terraform resource instances keyed by `["corp"]` and Vault paths such as `ad-corp`, `ldap-ad-corp`, and `kerberos-ad-corp`. Add another keyed object to configure another domain. Domain-specific write-only values are read from `admin-kv` at `engine-ad/<domain>`, `auth-ldap-ad/<domain>`, and `auth-kerberos-ad/<domain>`.
 
-The `kubernetes_clusters` map configures the Kubernetes JWT auth methods. Its keys are stable short cluster names: the example `lab` key produces Terraform resource instances keyed by `["lab"]` and the Vault auth path `jwt-kubernetes-lab`. Add another keyed object to configure another cluster, and use the same key in the `cluster` column of `input-files/auth-jwt-kubernetes.csv`.
+The `kubernetes_clusters` map configures both the Kubernetes JWT auth methods and Kubernetes secrets engines. Its keys are stable short cluster names: the example `lab` key produces Terraform resource instances keyed by `["lab"]` and Vault paths such as `jwt-kubernetes-lab` and `kubernetes-lab`. Add another keyed object to configure another cluster, and use the same key in the `cluster` columns of the Kubernetes CSV inputs. Cluster-specific write-only values are read from `admin-kv` at `engine-kubernetes/<cluster>`.
+
+The `racf_domains` map configures both the RACF LDAP auth methods and RACF LDAP secrets engines. Its keys are stable short domain names: the example `mainframe` key produces Terraform resource instances keyed by `["mainframe"]` and Vault paths such as `ldap-racf-mainframe` and `racf-mainframe`. Use the same key in the `domain` columns of the RACF CSV inputs. Domain-specific write-only values are read from `admin-kv` at `auth-ldap-racf/<domain>` and `engine-racf/<domain>`.
 
 CSV files keep one environment value per row. When using path-based VCS triggers, include the applicable file under `tfvars-environment` and the component's CSV file in addition to its Terraform working directory.
 
@@ -88,9 +97,12 @@ HCP Terraform workspaces use the name `<directory>-<environment>`, such as `auth
 
 Bootstrap each Vault deployment in this order:
 
-1. Run `auth-jwt-terraform-<environment>` with the `admin-auth-jwt-terraform` role on the bootstrap `admin-jwt-terraform` auth method so it creates the regular JWT backend, `admin-default-role`, and the explicit `admin-engine-identity` role and policy.
-2. Run `engine-identity-<environment>` with `admin-engine-identity` so it creates the admin policies, entities, and aliases from `admin-workspaces.csv`.
-3. Run the remaining `auth-*` and `engine-*` workspaces with `admin-default-role`; their workspace claim resolves to the environment-specific admin entity and policy.
+1. Create the bootstrap admin-jwt-terraform auth method manually.
+2. Run `auth-jwt-terraform-<environment>` with the `admin-auth-jwt-terraform` role on the bootstrap `admin-jwt-terraform` auth method so it creates the regular JWT backend, `admin-default-role`, and the explicit `admin-engine-identity` role and policy.
+3. Run `engine-identity-<environment>` with `admin-engine-identity` so it creates the admin policies, entities, and aliases from `admin-workspaces.csv`.
+4. Run `engine-kv-<environment>` so it creates the `admin-kv` engine for configuration secrets
+5. Populate the `admin-kv` with the configuration secrets.
+6. Run the remaining `auth-*` and `engine-*` workspaces with `admin-default-role`; their workspace claim resolves to the environment-specific admin entity and policy.
 
 ## Independent project
 

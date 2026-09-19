@@ -27,6 +27,7 @@ resource "vault_identity_entity" "admin_entities" {
     vault_policy.admin_engine_mysql_policy,
     vault_policy.admin_engine_oracle_policy,
     vault_policy.admin_engine_postgres_policy,
+    vault_policy.admin_engine_racf_policy,
     vault_policy.admin_engine_snowflake_policy,
     vault_policy.admin_engine_terraform_policy,
   ]
@@ -280,28 +281,36 @@ EOT
 }
 
 resource "vault_policy" "admin_auth_ldap_racf_policy" {
-  name   = "admin-auth-ldap-racf-policy"
-  policy = <<EOT
-path "sys/auth/ldap-racf" {
+  name = "admin-auth-ldap-racf-policy"
+  policy = join("\n\n", concat(
+    [
+      for domain in sort(keys(var.racf_domains)) : <<-EOT
+path "sys/auth/ldap-racf-${domain}" {
   capabilities = ["create", "read", "update", "delete", "sudo"]
 }
 
-path "sys/mounts/auth/ldap-racf" {
+path "sys/mounts/auth/ldap-racf-${domain}" {
   capabilities = ["read"]
 }
 
-path "sys/mounts/auth/ldap-racf/tune" {
+path "sys/mounts/auth/ldap-racf-${domain}/tune" {
   capabilities = ["read", "update"]
 }
 
-path "auth/ldap-racf/*" {
+path "auth/ldap-racf-${domain}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
+EOT
+    ],
+    [
+      <<-EOT
 
 path "admin-kv/data/auth-ldap-racf/*" {
   capabilities = ["read"]
 }
 EOT
+    ],
+  ))
 }
 
 resource "vault_policy" "admin_auth_msi_azure_policy" {
@@ -528,23 +537,29 @@ EOT
 }
 
 resource "vault_policy" "admin_engine_kubernetes_policy" {
-  name   = "admin-engine-kubernetes-policy"
-  policy = <<EOT
-path "sys/mounts/kubernetes-lab" {
+  name = "admin-engine-kubernetes-policy"
+  policy = join("\n\n", concat(
+    [
+      for cluster in sort(keys(var.kubernetes_clusters)) : <<-EOT
+path "sys/mounts/kubernetes-${cluster}" {
   capabilities = ["create", "read", "update", "delete", "sudo"]
 }
 
-path "sys/mounts/kubernetes-lab/tune" {
+path "sys/mounts/kubernetes-${cluster}/tune" {
   capabilities = ["read", "update"]
 }
 
-path "kubernetes-lab/*" {
+path "kubernetes-${cluster}/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 
-path "kubernetes-lab/creds/*" {
+path "kubernetes-${cluster}/creds/*" {
   capabilities = ["deny"]
 }
+EOT
+    ],
+    [
+      <<-EOT
 
 path "admin-kv/data/engine-kubernetes" {
   capabilities = ["read"]
@@ -554,6 +569,8 @@ path "admin-kv/data/engine-kubernetes/*" {
   capabilities = ["read"]
 }
 EOT
+    ],
+  ))
 }
 
 resource "vault_policy" "admin_engine_kv_policy" {
@@ -694,6 +711,55 @@ path "admin-kv/data/engine-postgres/*" {
   capabilities = ["read"]
 }
 EOT
+}
+
+resource "vault_policy" "admin_engine_racf_policy" {
+  name = "admin-engine-racf-policy"
+  policy = join("\n\n", concat(
+    [
+      for domain in sort(keys(var.racf_domains)) : <<-EOT
+path "sys/mounts/racf-${domain}" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
+path "sys/mounts/racf-${domain}/tune" {
+  capabilities = ["read", "update"]
+}
+
+path "racf-${domain}/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "racf-${domain}/creds/*" {
+  capabilities = ["deny"]
+}
+
+path "racf-${domain}/library/+/check-out" {
+  capabilities = ["deny"]
+}
+
+path "racf-${domain}/rotate-role/*" {
+  capabilities = ["deny"]
+}
+
+path "racf-${domain}/static-cred/*" {
+  capabilities = ["deny"]
+}
+EOT
+    ],
+    [
+      <<-EOT
+
+path "admin-kv/data/engine-racf" {
+  capabilities = ["read"]
+}
+
+path "admin-kv/data/engine-racf/*" {
+  capabilities = ["read"]
+}
+EOT
+    ],
+  ))
 }
 
 resource "vault_policy" "admin_engine_snowflake_policy" {

@@ -154,7 +154,19 @@ path "ad-${domain}/static-cred/{{identity.entity.metadata.app}}-{{identity.entit
   capabilities = ["read"]
 }
 DOMAIN
-])}
+  ])}
+
+${join("\n\n", [
+  for domain in sort(keys(var.racf_domains)) : <<-DOMAIN
+path "racf-${domain}/static-cred/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
+  capabilities = ["read"]
+}
+
+path "racf-${domain}/static-cred/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
+  capabilities = ["read"]
+}
+DOMAIN
+  ])}
 
 path "aws/sts/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["update"]
@@ -164,21 +176,25 @@ path "aws/sts/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-
   capabilities = ["update"]
 }
 
-path "azure/static-creds/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
+path "azure/creds/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["read"]
 }
 
-path "azure/static-creds/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
+path "azure/creds/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["read"]
 }
 
-path "kubernetes-lab/creds/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
+${join("\n\n", [
+  for cluster in sort(keys(var.kubernetes_clusters)) : <<-CLUSTER
+path "kubernetes-${cluster}/creds/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["update"]
 }
 
-path "kubernetes-lab/creds/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
+path "kubernetes-${cluster}/creds/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["update"]
 }
+CLUSTER
+])}
 
 path "mysql/static-creds/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["read"]
@@ -284,15 +300,19 @@ path "ad-${domain}/rotate-role/{{identity.entity.metadata.app}}-{{identity.entit
   capabilities = ["update"]
 }
 DOMAIN
+  ])}
+
+${join("\n\n", [
+  for domain in sort(keys(var.racf_domains)) : <<-DOMAIN
+path "racf-${domain}/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
+  capabilities = ["update"]
+}
+
+path "racf-${domain}/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
+  capabilities = ["update"]
+}
+DOMAIN
 ])}
-
-path "azure/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
-  capabilities = ["update"]
-}
-
-path "azure/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.env}}-*" {
-  capabilities = ["update"]
-}
 
 path "mysql/rotate-role/{{identity.entity.metadata.app}}-{{identity.entity.metadata.sub}}-{{identity.entity.metadata.env}}-*" {
   capabilities = ["update"]

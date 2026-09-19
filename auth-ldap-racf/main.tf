@@ -1,22 +1,26 @@
 ephemeral "vault_kv_secret_v2" "terraform_secrets" {
+  for_each = var.racf_domains
+
   mount = "admin-kv"
-  name  = "auth-ldap-racf/${var.racf_domain}"
+  name  = "auth-ldap-racf/${each.key}"
 }
 
 resource "vault_ldap_auth_backend" "ldap_racf" {
-  path = "ldap-racf"
-  url  = var.racf_ldap_url
+  for_each = var.racf_domains
 
-  binddn              = var.racf_ldap_bind_dn
-  bindpass_wo         = tostring(ephemeral.vault_kv_secret_v2.terraform_secrets.data["bindpass_wo"])
-  bindpass_wo_version = var.racf_ldap_bindpass_wo_version
+  path = "ldap-racf-${each.key}"
+  url  = each.value.ldap_racf_url
 
-  userdn            = var.racf_ldap_user_dn
-  userattr          = var.racf_user_attribute
-  userfilter        = var.racf_user_filter
-  groupdn           = var.racf_ldap_group_dn
-  groupfilter       = var.racf_group_filter
-  groupattr         = var.racf_group_attribute
+  binddn              = each.value.ldap_racf_bind_dn
+  bindpass_wo         = tostring(ephemeral.vault_kv_secret_v2.terraform_secrets[each.key].data["bindpass_wo"])
+  bindpass_wo_version = each.value.ldap_racf_bindpass_wo_version
+
+  userdn            = each.value.ldap_racf_user_dn
+  userattr          = each.value.ldap_racf_user_attribute
+  userfilter        = each.value.ldap_racf_user_filter
+  groupdn           = each.value.ldap_racf_group_dn
+  groupfilter       = each.value.ldap_racf_group_filter
+  groupattr         = each.value.ldap_racf_group_attribute
   deny_null_bind    = true
   username_as_alias = true
 

@@ -20,6 +20,7 @@ dev,lucierlabs,hashicorp-vault-onboarding,engine-kv-dev,admin-engine-kv-policy
 dev,lucierlabs,hashicorp-vault-onboarding,engine-mysql-dev,admin-engine-mysql-policy
 dev,lucierlabs,hashicorp-vault-onboarding,engine-oracle-dev,admin-engine-oracle-policy
 dev,lucierlabs,hashicorp-vault-onboarding,engine-postgres-dev,admin-engine-postgres-policy
+dev,lucierlabs,hashicorp-vault-onboarding,engine-racf-dev,admin-engine-racf-policy
 dev,lucierlabs,hashicorp-vault-onboarding,engine-snowflake-dev,admin-engine-snowflake-policy
 dev,lucierlabs,hashicorp-vault-onboarding,engine-terraform-dev,admin-engine-terraform-policy
 test,lucierlabs,hashicorp-vault-onboarding,auth-admin-ldap-test,admin-auth-admin-ldap-policy
@@ -43,6 +44,7 @@ test,lucierlabs,hashicorp-vault-onboarding,engine-kv-test,admin-engine-kv-policy
 test,lucierlabs,hashicorp-vault-onboarding,engine-mysql-test,admin-engine-mysql-policy
 test,lucierlabs,hashicorp-vault-onboarding,engine-oracle-test,admin-engine-oracle-policy
 test,lucierlabs,hashicorp-vault-onboarding,engine-postgres-test,admin-engine-postgres-policy
+test,lucierlabs,hashicorp-vault-onboarding,engine-racf-test,admin-engine-racf-policy
 test,lucierlabs,hashicorp-vault-onboarding,engine-snowflake-test,admin-engine-snowflake-policy
 test,lucierlabs,hashicorp-vault-onboarding,engine-terraform-test,admin-engine-terraform-policy
 prod,lucierlabs,hashicorp-vault-onboarding,auth-admin-ldap-prod,admin-auth-admin-ldap-policy
@@ -66,5 +68,6 @@ prod,lucierlabs,hashicorp-vault-onboarding,engine-kv-prod,admin-engine-kv-policy
 prod,lucierlabs,hashicorp-vault-onboarding,engine-mysql-prod,admin-engine-mysql-policy
 prod,lucierlabs,hashicorp-vault-onboarding,engine-oracle-prod,admin-engine-oracle-policy
 prod,lucierlabs,hashicorp-vault-onboarding,engine-postgres-prod,admin-engine-postgres-policy
+prod,lucierlabs,hashicorp-vault-onboarding,engine-racf-prod,admin-engine-racf-policy
 prod,lucierlabs,hashicorp-vault-onboarding,engine-snowflake-prod,admin-engine-snowflake-policy
 prod,lucierlabs,hashicorp-vault-onboarding,engine-terraform-prod,admin-engine-terraform-policy

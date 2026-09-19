@@ -4,11 +4,16 @@ locals {
 
   input_list = [
     for row in local.input_data : {
-      app    = row.application
-      sub    = row.sub-application
-      env    = row.environment
-      domain = row.domain
-      acct   = row.account
+      app_key  = "${row.application}-${row.environment}-${row.domain}-${row.account}"
+      app_role = "${row.application}-${row.environment}-${row.account}"
+      sub_key  = "${row.application}-${row.sub-application}-${row.environment}-${row.domain}-${row.account}"
+      sub_role = "${row.application}-${row.sub-application}-${row.environment}-${row.account}"
+      app      = row.application
+      sub      = row.sub-application
+      env      = row.environment
+      domain   = row.domain
+      acct     = row.account
+      ttl      = tonumber(row.ttl)
     } if contains(var.environments, row.environment)
   ]
 }

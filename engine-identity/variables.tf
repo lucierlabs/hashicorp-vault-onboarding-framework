@@ -19,3 +19,9 @@ variable "kubernetes_clusters" {
   description = "Kubernetes cluster configurations keyed by the short cluster name used in Vault auth paths"
   nullable    = false
 }
+
+variable "racf_domains" {
+  type        = map(any)
+  description = "RACF domain configurations keyed by the short domain name used in Vault auth and secrets engine paths"
+  nullable    = false
+}

@@ -10,18 +10,12 @@ variable "environments" {
   nullable    = false
 }
 
-variable "kubernetes_host" {
-  type        = string
-  description = "URL of the Kubernetes API server used by the Kubernetes secrets engine"
-}
-
-variable "kubernetes_ca_cert" {
-  type        = string
-  description = "PEM-encoded CA certificate used to verify the Kubernetes API server"
-}
-
-variable "vault_kubernetes_service_account_jwt_wo_version" {
-  type        = number
-  description = "Version counter used to trigger an update of the write-only Kubernetes service account JWT"
-  default     = 1
+variable "kubernetes_clusters" {
+  type = map(object({
+    kubernetes_host                = string
+    kubernetes_ca_cert             = string
+    service_account_jwt_wo_version = optional(number, 1)
+  }))
+  description = "Kubernetes secrets engine configurations keyed by the short cluster name used in CSV inputs, Vault paths, and Terraform state"
+  nullable    = false
 }

@@ -4,12 +4,15 @@ locals {
 
   input_list = [
     for row in local.input_data : {
+      app_role  = "${row.application}-${row.environment}-${row.application-registration-name}-${row.application-client-id}"
+      sub_role  = "${row.application}-${row.sub-application}-${row.environment}-${row.application-registration-name}-${row.application-client-id}"
       app       = row.application
       sub       = row.sub-application
       env       = row.environment
       reg_name  = row.application-registration-name
       client_id = row.application-client-id
       object_id = row.application-object-id
+      ttl       = tonumber(row.ttl)
     } if contains(var.environments, row.environment)
   ]
 }
